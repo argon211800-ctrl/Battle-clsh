@@ -22,8 +22,15 @@ jobs:
           test -f package.json || { echo "package.json is missing"; exit 1; }
           node -e "const p=require('./package.json'); console.log(p.scripts)"
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund --verbose
+          - name: Install dependencies
+        run: |
+          npm install --no-audit --no-fund --verbose 2>&1 | tee npm-install.log
+        continue-on-error: true
+
+      - name: Show npm error details
+        if: always()
+        run: |
+          tail -n 60 npm-install.log || true
 
       - name: Build web app
         run: npm run build
