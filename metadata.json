@@ -1,0 +1,8 @@
+{
+  "name": "Remix BattleClash - Free Fire Esports Tournaments",
+  "description": "Production-grade Free Fire community tournament app with black and gold esports UI, secure room ID disclosure, kill \u0026 placement scoring, leaderboards, player profiles, and Android APK packaging readiness.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
