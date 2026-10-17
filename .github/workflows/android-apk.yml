@@ -28,7 +28,7 @@ jobs:
           node -e "const p=require('./package.json'); console.log('Scripts:',p.scripts); console.log('Capacitor:',p.dependencies?.['@capacitor/core'] || p.devDependencies?.['@capacitor/core'] || 'not listed')"
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund --legacy-peer-deps
 
       - name: Build web app
         run: npm run build
