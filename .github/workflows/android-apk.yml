@@ -1,0 +1,73 @@
+
+name: BattleClash APK Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout BattleClash
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Check project files
+        run: |
+          echo "Checking project files..."
+          test -f package.json || { echo "ERROR: package.json missing at repository root"; exit 1; }
+          node -e "const p=require('./package.json'); console.log('Scripts:',p.scripts); console.log('Capacitor:',p.dependencies?.['@capacitor/core'] || p.devDependencies?.['@capacitor/core'] || 'not listed')"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Check Android project
+        run: |
+          if [ ! -d android ]; then
+            echo "ERROR: Android project folder is missing."
+            echo "A Capacitor Android project must be generated and committed first."
+            exit 1
+          fi
+          if [ ! -f android/gradlew ]; then
+            echo "ERROR: android/gradlew is missing."
+            exit 1
+          fi
+
+      - name: Set up Java
+        if: ${{ success() }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Android SDK
+        if: ${{ success() }}
+        uses: android-actions/setup-android@v3
+
+      - name: Sync Capacitor and build APK
+        run: |
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BattleClash-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
