@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -16,16 +17,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Check project files
+      - name: Check project
         run: |
-          test -f package.json || (echo "ERROR: package.json is missing from the repository root" && exit 1)
-          node -e "const p=require('./package.json'); console.log('Package:',p.name); console.log('Scripts:',p.scripts)"
-      
-            - name: Install dependencies
-        run: |
-          node --version
-          npm --version
-          npm install --no-audit --no-fund --verbose
+          test -f package.json || { echo "package.json is missing"; exit 1; }
+          node -e "const p=require('./package.json'); console.log(p.scripts)"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --verbose
 
       - name: Build web app
         run: npm run build
@@ -39,17 +37,12 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Check Capacitor Android project
+      - name: Build APK
         run: |
           if [ ! -d android ]; then
-            echo "ERROR: Android project folder is missing."
-            echo "A valid Capacitor Android project must be added before an APK can be built."
+            echo "Android project folder is missing."
             exit 1
           fi
-          npx cap sync android
-
-      - name: Build debug APK
-        run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
